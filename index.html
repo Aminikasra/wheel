@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سیستم گردونه شانس</title>
     <style>
+        /* همه استایل‌های قبلی رو اینجا کپی کنید */
         body {
             font-family: Tahoma, sans-serif;
             text-align: center;
@@ -42,54 +43,11 @@
         .btn:hover {
             background: #c0392b;
         }
-        .btn:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-        }
         .qr-container {
             margin: 20px 0;
             padding: 20px;
             border: 2px dashed #ddd;
             border-radius: 10px;
-        }
-        .wheel-container {
-            position: relative;
-            width: 300px;
-            height: 300px;
-            margin: 20px auto;
-        }
-        .spin-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 18px;
-            border-radius: 50px;
-            cursor: pointer;
-            margin: 20px 0;
-        }
-        .result {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 20px 0;
-            padding: 15px;
-            border-radius: 10px;
-        }
-        .coupon {
-            font-family: monospace;
-            font-size: 20px;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            border: 2px dashed #27ae60;
-        }
-        .error {
-            background: #ffeaa7;
-            color: #d63031;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
         }
         .stats {
             background: #e8f5e8;
@@ -106,46 +64,18 @@
         .btn-success {
             background: #27ae60;
         }
-        .btn-success:hover {
-            background: #219653;
-        }
-        .btn-info {
-            background: #3498db;
-        }
-        .btn-info:hover {
-            background: #2980b9;
-        }
         .btn-warning {
             background: #f39c12;
-        }
-        .btn-warning:hover {
-            background: #e67e22;
-        }
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            .print-section, .print-section * {
-                visibility: visible;
-            }
-            .print-section {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- تب‌ها -->
         <div style="margin-bottom: 20px;">
             <button class="btn" onclick="showTab('management')">مدیریت</button>
             <button class="btn" onclick="showTab('wheel')">گردونه شانس</button>
         </div>
 
-        <!-- تب مدیریت -->
         <div id="management" class="tab active">
             <h1>🎯 مدیریت گردونه شانس</h1>
             <p>QR کد یکبار مصرف برای تراکت فروشگاه</p>
@@ -166,28 +96,18 @@
             </div>
         </div>
 
-        <!-- تب گردونه -->
         <div id="wheel" class="tab">
             <h1>🎯 گردونه شانس فروشگاه</h1>
             <p>برای دریافت تخفیف گردونه رو بچرخانید!</p>
             
-            <div class="wheel-container">
-                <canvas id="wheelCanvas" width="300" height="300"></canvas>
+            <div style="margin: 20px 0; padding: 20px; background: #ffebee; border-radius: 10px;">
+                <p>⚠️ برای استفاده از گردونه، لطفاً QR کد رو از تب مدیریت اسکن کنید</p>
             </div>
-            
-            <button class="spin-btn" id="spinBtn">چرخاندن گردونه</button>
-            
-            <div class="result" id="result"></div>
-            <div class="coupon" id="coupon" style="display: none;"></div>
-            <div class="error" id="error" style="display: none;"></div>
         </div>
     </div>
 
-    <!-- کتابخانه QR Code -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.0/build/qrcode.min.js"></script>
-
     <script>
-        // سیستم مدیریت تب‌ها
+        // سیستم ساده‌تر برای تولید QR کد
         function showTab(tabName) {
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
@@ -195,7 +115,6 @@
             document.getElementById(tabName).classList.add('active');
         }
 
-        // سیستم مدیریت QR کدها
         class QRManager {
             constructor() {
                 this.storageKey = 'wheelQRCodes';
@@ -226,36 +145,13 @@
                 data.qrcodes[qrId] = {
                     id: qrId,
                     used: false,
-                    created: new Date().toLocaleString('fa-IR'),
-                    usedAt: null,
-                    discount: null,
-                    couponCode: null
+                    created: new Date().toLocaleString('fa-IR')
                 };
 
                 data.stats.total++;
                 this.saveData(data);
                 
                 return qrId;
-            }
-
-            useQR(qrId, discount, couponCode) {
-                const data = this.getData();
-                if (data.qrcodes[qrId] && !data.qrcodes[qrId].used) {
-                    data.qrcodes[qrId].used = true;
-                    data.qrcodes[qrId].usedAt = new Date().toLocaleString('fa-IR');
-                    data.qrcodes[qrId].discount = discount;
-                    data.qrcodes[qrId].couponCode = couponCode;
-                    
-                    data.stats.used++;
-                    this.saveData(data);
-                    return true;
-                }
-                return false;
-            }
-
-            checkQR(qrId) {
-                const data = this.getData();
-                return data.qrcodes[qrId];
             }
 
             getStats() {
@@ -265,7 +161,6 @@
 
         const qrManager = new QRManager();
 
-        // بخش مدیریت
         function generateQR() {
             const qrId = qrManager.generateQR();
             const currentUrl = window.location.href.split('?')[0];
@@ -273,14 +168,18 @@
             
             document.getElementById('qrCode').innerHTML = '';
             
-            QRCode.toCanvas(document.getElementById('qrCode'), qrUrl, {
-                width: 200,
-                margin: 2,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                }
-            });
+            // استفاده از سرویس آنلاین Google برای تولید QR کد
+            const googleQRUrl = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(qrUrl)}&choe=UTF-8`;
+            
+            const img = document.createElement('img');
+            img.src = googleQRUrl;
+            img.width = 200;
+            img.height = 200;
+            img.alt = 'QR Code';
+            img.style.border = '2px solid #333';
+            img.style.borderRadius = '10px';
+            
+            document.getElementById('qrCode').appendChild(img);
             
             document.getElementById('qrInfo').innerHTML = `
                 <div style="margin-top: 15px; padding: 10px; background: #e8f5e8; border-radius: 5px;">
@@ -294,39 +193,33 @@
             updateStats();
         }
 
-        // دانلود QR کد
         function downloadQR() {
-            const canvas = document.querySelector('#qrCode canvas');
-            if (canvas) {
+            const img = document.querySelector('#qrCode img');
+            if (img) {
                 const link = document.createElement('a');
                 link.download = 'QR-Code-' + Date.now() + '.png';
-                link.href = canvas.toDataURL('image/png');
+                link.href = img.src;
                 link.click();
             } else {
                 alert('لطفاً اول QR کد تولید کنید');
             }
         }
 
-        // چاپ QR کد (روش ۲ - بدون popup)
         function printQRSimple() {
-            const canvas = document.querySelector('#qrCode canvas');
-            if (!canvas) {
+            const img = document.querySelector('#qrCode img');
+            if (!img) {
                 alert('لطفاً اول QR کد تولید کنید');
                 return;
             }
             
-            const qrImage = canvas.toDataURL('image/png');
-            
-            // ذخیره محتوای اصلی
             const originalContent = document.body.innerHTML;
             const originalTitle = document.title;
             
-            // ایجاد محتوای چاپ
             document.body.innerHTML = `
-                <div class="print-section" style="text-align: center; font-family: Tahoma; padding: 50px;">
+                <div style="text-align: center; font-family: Tahoma; padding: 50px;">
                     <h1>فروشگاه ما</h1>
                     <h2>QR کد گردونه شانس</h2>
-                    <img src="${qrImage}" style="width: 300px; height: 300px; border: 3px solid #333;">
+                    <img src="${img.src}" style="width: 300px; height: 300px; border: 3px solid #333;">
                     <p>این QR کد را اسکن کنید و در گردونه شانس شرکت کنید</p>
                     <p>تاریخ: ${new Date().toLocaleDateString('fa-IR')}</p>
                     <hr>
@@ -334,16 +227,9 @@
                 </div>
             `;
             
-            document.title = 'QR کد گردونه شانس';
-            
-            // چاپ
             window.print();
-            
-            // بازگشت به حالت عادی
             document.body.innerHTML = originalContent;
             document.title = originalTitle;
-            
-            // رفرش برای بازگردانی event listenerها
             window.location.reload();
         }
 
@@ -353,194 +239,7 @@
             document.getElementById('usedCount').textContent = stats.used;
         }
 
-        // بخش گردونه
-        class WheelGame {
-            constructor() {
-                this.canvas = document.getElementById('wheelCanvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.spinBtn = document.getElementById('spinBtn');
-                this.resultDiv = document.getElementById('result');
-                this.couponDiv = document.getElementById('coupon');
-                this.errorDiv = document.getElementById('error');
-                
-                this.isSpinning = false;
-                this.rotation = 0;
-                this.segments = this.createSegments();
-                
-                this.init();
-            }
-
-            createSegments() {
-                const segments = [];
-                const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
-                
-                for (let i = 1; i <= 100; i++) {
-                    segments.push({
-                        value: i,
-                        text: i + '%',
-                        color: colors[i % colors.length],
-                        isReal: i <= 30
-                    });
-                }
-                return segments;
-            }
-
-            init() {
-                this.checkQR();
-                this.drawWheel();
-                this.spinBtn.addEventListener('click', () => this.spin());
-            }
-
-            getQRId() {
-                const urlParams = new URLSearchParams(window.location.search);
-                return urlParams.get('qr');
-            }
-
-            checkQR() {
-                const qrId = this.getQRId();
-                if (qrId) {
-                    showTab('wheel');
-                    const qrData = qrManager.checkQR(qrId);
-                    
-                    if (!qrData) {
-                        this.showError('QR کد معتبر نیست');
-                        return;
-                    }
-
-                    if (qrData.used) {
-                        this.showError('این QR کد قبلاً استفاده شده است');
-                        this.spinBtn.disabled = true;
-                    }
-                }
-            }
-
-            showError(message) {
-                this.errorDiv.style.display = 'block';
-                this.errorDiv.textContent = '❌ ' + message;
-                this.spinBtn.disabled = true;
-            }
-
-            drawWheel() {
-                const centerX = this.canvas.width / 2;
-                const centerY = this.canvas.height / 2;
-                const radius = this.canvas.width / 2 - 10;
-                const segmentAngle = (2 * Math.PI) / this.segments.length;
-
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-                this.segments.forEach((segment, index) => {
-                    const startAngle = index * segmentAngle + this.rotation;
-                    const endAngle = (index + 1) * segmentAngle + this.rotation;
-
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(centerX, centerY);
-                    this.ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-                    this.ctx.closePath();
-                    this.ctx.fillStyle = segment.color;
-                    this.ctx.fill();
-                    this.ctx.stroke();
-
-                    this.ctx.save();
-                    this.ctx.translate(centerX, centerY);
-                    this.ctx.rotate(startAngle + segmentAngle / 2);
-                    this.ctx.textAlign = 'right';
-                    this.ctx.fillStyle = 'white';
-                    this.ctx.font = 'bold 12px Tahoma';
-                    
-                    if (segment.value % 10 === 0 || segment.value <= 10) {
-                        this.ctx.fillText(segment.text, radius - 15, 5);
-                    }
-                    
-                    this.ctx.restore();
-                });
-
-                this.ctx.beginPath();
-                this.ctx.arc(centerX, centerY, 15, 0, 2 * Math.PI);
-                this.ctx.fillStyle = '#ffd700';
-                this.ctx.fill();
-                this.ctx.stroke();
-            }
-
-            async spin() {
-                if (this.isSpinning) return;
-
-                const qrId = this.getQRId();
-                if (!qrId) {
-                    this.showError('QR کد معتبر نیست');
-                    return;
-                }
-
-                this.isSpinning = true;
-                this.spinBtn.disabled = true;
-                this.resultDiv.textContent = '';
-                this.couponDiv.style.display = 'none';
-
-                const winningValue = Math.floor(Math.random() * 30) + 1;
-                const targetRotation = this.rotation + (5 * 2 * Math.PI) + 
-                                     ((winningValue - 1) * (2 * Math.PI / this.segments.length));
-
-                await this.animateSpin(targetRotation);
-                this.showResult(winningValue);
-                this.saveResult(qrId, winningValue);
-            }
-
-            animateSpin(targetRotation) {
-                return new Promise((resolve) => {
-                    const startTime = Date.now();
-                    const duration = 4000;
-
-                    const animate = () => {
-                        const currentTime = Date.now();
-                        const elapsed = currentTime - startTime;
-                        const progress = Math.min(elapsed / duration, 1);
-                        
-                        const easeOut = 1 - Math.pow(1 - progress, 3);
-                        this.rotation = easeOut * targetRotation;
-                        
-                        this.drawWheel();
-
-                        if (progress < 1) {
-                            requestAnimationFrame(animate);
-                        } else {
-                            this.isSpinning = false;
-                            resolve();
-                        }
-                    };
-
-                    animate();
-                });
-            }
-
-            showResult(discount) {
-                const couponCode = 'DISC' + Date.now().toString(36).toUpperCase().substr(0, 8);
-                
-                this.resultDiv.textContent = `🎉 تبریک! شما ${discount}% تخفیف گرفتید!`;
-                this.resultDiv.style.background = '#d4edda';
-                this.resultDiv.style.color = '#155724';
-                
-                this.couponDiv.style.display = 'block';
-                this.couponDiv.textContent = `کد تخفیف: ${couponCode}`;
-                
-                return couponCode;
-            }
-
-            saveResult(qrId, discount) {
-                const couponCode = this.showResult(discount);
-                qrManager.useQR(qrId, discount, couponCode);
-                updateStats();
-            }
-        }
-
-        // راه‌اندازی اولیه
-        const wheelGame = new WheelGame();
-        window.onload = function() {
-            updateStats();
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('qr')) {
-                showTab('wheel');
-            }
-        };
+        window.onload = updateStats;
     </script>
 </body>
-</html>
+    </html>
