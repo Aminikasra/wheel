@@ -1,6 +1,5 @@
 # سیستم گردونه شانس
 
-سیستم گردونه شانس با QR کد یکبار مصرف برای فروشگاه
+سیستم ساده گردونه شانس با QR کد
 
-## آدرس سایت:
-https://aminikasra.github.io/wheel/
+آدرس: https://aminikasra.github.io/wheel/
