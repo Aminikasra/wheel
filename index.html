@@ -5,156 +5,127 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سیستم گردونه شانس</title>
     <style>
-        /* استایل‌های قبلی رو نگه دارید */
         body {
             font-family: Tahoma, sans-serif;
             text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f0f2f5;
             margin: 0;
             padding: 20px;
-            min-height: 100vh;
-            color: white;
         }
         .container {
             max-width: 500px;
             margin: 0 auto;
             background: white;
             padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            color: #333;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         .btn {
             background: #e74c3c;
             color: white;
             border: none;
-            padding: 12px 25px;
-            font-size: 16px;
+            padding: 15px 30px;
+            font-size: 18px;
             border-radius: 8px;
             cursor: pointer;
             margin: 10px;
         }
-        .btn-success { background: #27ae60; }
-        .btn-warning { background: #f39c12; }
-        .qr-container { margin: 20px 0; padding: 20px; border: 2px dashed #ddd; border-radius: 10px; }
+        .qr-box {
+            margin: 20px 0;
+            padding: 20px;
+            border: 3px dashed #27ae60;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        .info-box {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
     </style>
-    <!-- اضافه کردن کتابخانه QRCode.js -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>🎯 مدیریت گردونه شانس</h1>
-        <button class="btn" onclick="generateQR()">تولید QR کد جدید</button>
+        <h1>🎯 سیستم گردونه شانس</h1>
+        <p>برای تولید QR کد روی دکمه زیر کلیک کنید</p>
         
-        <div class="qr-container">
-            <div id="qrCode"></div>
-            <div id="qrInfo"></div>
+        <button class="btn" onclick="generateSimpleQR()">تولید QR کد</button>
+        
+        <div class="qr-box">
+            <div id="qrArea"></div>
+        </div>
+        
+        <div class="info-box">
+            <h3>📝 راهنما:</h3>
+            <p>۱. QR کد رو با دوربین اسکن کنید</p>
+            <p>۲. به صفحه گردونه منتقل میشید</p>
+            <p>۳. گردونه رو بچرخونید و تخفیف بگیرید</p>
         </div>
     </div>
 
     <script>
-        function generateQR() {
-            const qrId = 'QR_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-            const qrUrl = window.location.href.split('?')[0] + '?qr=' + qrId;
+        function generateSimpleQR() {
+            const qrId = 'QR_' + Date.now();
+            const qrUrl = 'https://aminikasra.github.io/wheel/?qr=' + qrId;
             
-            document.getElementById('qrCode').innerHTML = '';
-            document.getElementById('qrInfo').innerHTML = '';
+            // پاک کردن محتوای قبلی
+            document.getElementById('qrArea').innerHTML = '';
             
-            // تولید QR کد با کتابخانه
-            QRCode.toCanvas(document.getElementById('qrCode'), qrUrl, {
-                width: 200,
-                margin: 2,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                }
-            }, function (error) {
-                if (error) {
-                    // اگر کتابخانه کار نکرد، از روش جایگزین استفاده کن
-                    fallbackQR(qrUrl, qrId);
-                } else {
-                    // اگر کتابخانه کار کرد
-                    showQRInfo(qrId, qrUrl);
-                }
-            });
-        }
-
-        function fallbackQR(qrUrl, qrId) {
-            // روش جایگزین: استفاده از Canvas دستی
-            const canvas = document.createElement('canvas');
-            canvas.width = 200;
-            canvas.height = 200;
-            const ctx = canvas.getContext('2d');
+            // ایجاد یک تصویر ساده از QR کد با استفاده از API
+            const qrImage = document.createElement('img');
+            qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUrl)}`;
+            qrImage.alt = 'QR Code';
+            qrImage.style.border = '2px solid #333';
+            qrImage.style.borderRadius = '10px';
             
-            // پس‌زمینه سفید
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, 200, 200);
+            document.getElementById('qrArea').appendChild(qrImage);
             
-            // رسم QR کد ساده (مربع‌های مشکی)
-            ctx.fillStyle = '#000000';
-            for (let i = 0; i < 100; i++) {
-                if (Math.random() > 0.5) {
-                    const x = Math.floor(Math.random() * 18) * 10 + 10;
-                    const y = Math.floor(Math.random() * 18) * 10 + 10;
-                    ctx.fillRect(x, y, 8, 8);
-                }
-            }
-            
-            document.getElementById('qrCode').appendChild(canvas);
-            showQRInfo(qrId, qrUrl);
-        }
-
-        function showQRInfo(qrId, qrUrl) {
-            document.getElementById('qrInfo').innerHTML = `
-                <div style="margin-top: 15px; padding: 10px; background: #e8f5e8; border-radius: 5px;">
-                    <p><strong>شناسه:</strong> ${qrId}</p>
-                    <p><strong>لینک:</strong> <br><small>${qrUrl}</small></p>
-                    <button class="btn btn-success" onclick="downloadQR()">📥 ذخیره QR کد</button>
-                    <button class="btn btn-warning" onclick="printQR()">🖨️ چاپ QR کد</button>
-                </div>
+            // اضافه کردن دکمه‌های دانلود و چاپ
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.style.marginTop = '15px';
+            buttonsDiv.innerHTML = `
+                <button class="btn" onclick="downloadQRImage()" style="background: #27ae60;">ذخیره عکس</button>
+                <button class="btn" onclick="printPage()" style="background: #f39c12;">چاپ</button>
             `;
+            
+            document.getElementById('qrArea').appendChild(buttonsDiv);
+            
+            // نمایش اطلاعات
+            const infoDiv = document.createElement('div');
+            infoDiv.style.marginTop = '15px';
+            infoDiv.style.padding = '10px';
+            infoDiv.style.background = '#e3f2fd';
+            infoDiv.style.borderRadius = '5px';
+            infoDiv.innerHTML = `
+                <p><strong>شناسه:</strong> ${qrId}</p>
+                <p><strong>لینک:</strong> <br><small>${qrUrl}</small></p>
+            `;
+            
+            document.getElementById('qrArea').appendChild(infoDiv);
         }
 
-        function downloadQR() {
-            const canvas = document.querySelector('#qrCode canvas');
-            if (canvas) {
+        function downloadQRImage() {
+            const img = document.querySelector('#qrArea img');
+            if (img) {
+                // ایجاد یک لینک موقت برای دانلود
                 const link = document.createElement('a');
-                link.download = 'QR-Code-' + Date.now() + '.png';
-                link.href = canvas.toDataURL();
+                link.href = img.src;
+                link.download = 'qrcode-' + Date.now() + '.png';
+                document.body.appendChild(link);
                 link.click();
+                document.body.removeChild(link);
             } else {
                 alert('لطفاً اول QR کد تولید کنید');
             }
         }
 
-        function printQR() {
-            const canvas = document.querySelector('#qrCode canvas');
-            if (!canvas) {
-                alert('لطفاً اول QR کد تولید کنید');
-                return;
-            }
-            
-            const printWindow = window.open('', '_blank');
-            const qrImage = canvas.toDataURL();
-            
-            printWindow.document.write(`
-                <html dir="rtl">
-                <head><title>چاپ QR کد</title></head>
-                <body style="text-align: center; font-family: Tahoma; padding: 50px;">
-                    <h1>فروشگاه ما</h1>
-                    <h2>QR کد گردونه شانس</h2>
-                    <img src="${qrImage}" style="width: 300px; height: 300px; border: 3px solid #333;">
-                    <p>این QR کد را اسکن کنید و در گردونه شانس شرکت کنید</p>
-                    <p>تاریخ: ${new Date().toLocaleDateString('fa-IR')}</p>
-                    <hr>
-                    <small>هر QR کد فقط یکبار قابل استفاده است</small>
-                </body>
-                </html>
-            `);
-            
-            printWindow.document.close();
-            printWindow.print();
+        function printPage() {
+            window.print();
         }
+
+        // تولید خودکار QR کد هنگام لود صفحه
+        window.onload = generateSimpleQR;
     </script>
 </body>
 </html>
