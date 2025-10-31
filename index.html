@@ -103,6 +103,38 @@
         .tab.active {
             display: block;
         }
+        .btn-success {
+            background: #27ae60;
+        }
+        .btn-success:hover {
+            background: #219653;
+        }
+        .btn-info {
+            background: #3498db;
+        }
+        .btn-info:hover {
+            background: #2980b9;
+        }
+        .btn-warning {
+            background: #f39c12;
+        }
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-section, .print-section * {
+                visibility: visible;
+            }
+            .print-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -254,15 +286,65 @@
                 <div style="margin-top: 15px; padding: 10px; background: #e8f5e8; border-radius: 5px;">
                     <p><strong>شناسه:</strong> ${qrId}</p>
                     <p><strong>لینک:</strong> <br><small>${qrUrl}</small></p>
-                    <button class="btn" onclick="printPage()" style="background: #27ae60;">چاپ QR کد</button>
+                    <button class="btn btn-success" onclick="downloadQR()">📥 ذخیره QR کد</button>
+                    <button class="btn btn-warning" onclick="printQRSimple()">🖨️ چاپ QR کد</button>
                 </div>
             `;
             
             updateStats();
         }
 
-        function printPage() {
+        // دانلود QR کد
+        function downloadQR() {
+            const canvas = document.querySelector('#qrCode canvas');
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = 'QR-Code-' + Date.now() + '.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } else {
+                alert('لطفاً اول QR کد تولید کنید');
+            }
+        }
+
+        // چاپ QR کد (روش ۲ - بدون popup)
+        function printQRSimple() {
+            const canvas = document.querySelector('#qrCode canvas');
+            if (!canvas) {
+                alert('لطفاً اول QR کد تولید کنید');
+                return;
+            }
+            
+            const qrImage = canvas.toDataURL('image/png');
+            
+            // ذخیره محتوای اصلی
+            const originalContent = document.body.innerHTML;
+            const originalTitle = document.title;
+            
+            // ایجاد محتوای چاپ
+            document.body.innerHTML = `
+                <div class="print-section" style="text-align: center; font-family: Tahoma; padding: 50px;">
+                    <h1>فروشگاه ما</h1>
+                    <h2>QR کد گردونه شانس</h2>
+                    <img src="${qrImage}" style="width: 300px; height: 300px; border: 3px solid #333;">
+                    <p>این QR کد را اسکن کنید و در گردونه شانس شرکت کنید</p>
+                    <p>تاریخ: ${new Date().toLocaleDateString('fa-IR')}</p>
+                    <hr>
+                    <small>هر QR کد فقط یکبار قابل استفاده است</small>
+                </div>
+            `;
+            
+            document.title = 'QR کد گردونه شانس';
+            
+            // چاپ
             window.print();
+            
+            // بازگشت به حالت عادی
+            document.body.innerHTML = originalContent;
+            document.title = originalTitle;
+            
+            // رفرش برای بازگردانی event listenerها
+            window.location.reload();
         }
 
         function updateStats() {
